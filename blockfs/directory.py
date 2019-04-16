@@ -101,7 +101,7 @@ class Directory:
         :param compression_level: the level of compression
         :param metadata: metadata dictionary to include in the directory file
         """
-        self.directory_filename = directory_filename
+        self.directory_filename = os.path.abspath(directory_filename)
         self.x_extent = x_extent
         self.y_extent = y_extent
         self.z_extent = z_extent
@@ -328,6 +328,7 @@ class Directory:
             fd.write(np.array([len(json_md), self.directory_offset],
                               np.uint32).data)
             fd.write(json_md)
+        # Touch each file
         for filename in self.block_filenames:
             with open(filename, "wb") as fd:
                 pass
