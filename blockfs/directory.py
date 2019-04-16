@@ -120,7 +120,8 @@ class Directory:
         if y_stride is None:
             y_stride = (x_extent + x_block_size - 1) // x_block_size
         if z_stride is None:
-            z_stride = (y_stride * y_extent + y_block_size - 1) // y_block_size
+            z_stride = y_stride * ((y_extent + y_block_size - 1)
+                                   // y_block_size)
         self.x_stride = x_stride
         self.y_stride = y_stride
         self.z_stride = z_stride
