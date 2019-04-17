@@ -38,3 +38,5 @@ directory.close()
 block_128_64_0 = Directory.open("volume.blockfs").read_block(128, 64, 0)
 
 ```
+
+Works in conjunction with [precomputed-tif](https://github.com/chunglabmit/precomputed-tif)
