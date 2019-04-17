@@ -18,6 +18,12 @@ setup(
         "Development Status :: 5 - Production/Stable",
         'Programming Language :: Python :: 3.5'
     ],
+    entry_points=dict(
+        console_scripts = [
+            "blockfs-mv=blockfs.mv:main",
+            "blockfs-cp=blockfs.mv:copy_main"
+        ]
+    ),
     install_requires=[
         "numpy",
         "numcodecs"

@@ -40,3 +40,26 @@ block_128_64_0 = Directory.open("volume.blockfs").read_block(128, 64, 0)
 ```
 
 Works in conjunction with [precomputed-tif](https://github.com/chunglabmit/precomputed-tif)
+
+## Utilities
+
+```
+blockfs-mv <src> <dest>
+```
+Moves a blockfs directory file and its block files to a new
+location. The source should be a blockfs directory file and
+the destination should be the target directory for the files.
+The utility will move the block files and rewrite the directory
+file to point at the new block file locations.
+
+It's necessary to use blockfs-mv instead of mv because the file names
+of the block files are embedded within the directory file.
+
+* **src** - the name of the directory file of the blockfs to be moved
+* **dest** - the name of the filesystem target directory for the new
+             locations of the files 
+```
+blockfs-cp <src> <dest>
+```
+Copies a blockfs directory file. Same as blockfs-mv except does
+not (re)move the files.

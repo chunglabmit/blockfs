@@ -387,6 +387,7 @@ class Directory:
                       offset=directory_offset,
                       shape=(self.directory_entry_size,))
         offset, size = self.decode_directory_entry(m)
+        del m
         if size == 0:
             return np.zeros(shape, self.dtype)
         with open(self.block_filenames[idx], "rb") as fd:
