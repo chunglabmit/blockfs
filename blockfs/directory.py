@@ -247,7 +247,7 @@ class Directory:
             if header != Directory.HEADER:
                 raise IOError("%s is not a BlockFS file" % directory_filename)
             md_size, dir_offset = np.frombuffer(fd.read(8), np.uint32)
-            metadata = json.loads(fd.read(md_size), encoding="UTF-8")
+            metadata = json.loads(fd.read(md_size).decode("UTF-8"))
             application_metadata = {}
             for key, value in metadata.items():
                 if key == "XBlockSize":

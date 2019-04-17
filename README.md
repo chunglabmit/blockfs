@@ -1,5 +1,7 @@
 # BlockFS
 
+[![Travis CI Status](https://travis-ci.org/chunglabmit/blockfs.svg?branch=master)](https://travis-ci.org/chunglabmit/blockfs)
+
 This is file-based storage for Neuroglancer 3D blocks. Design elements:
 
 * Multithreaded write optimized for a FS with many disk spindles. No support
