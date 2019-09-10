@@ -43,6 +43,7 @@ filename = BlockFilenames[file_index]
 import enum
 import io
 import json
+import logging
 import numpy as np
 import os
 from numcodecs import Blosc
@@ -51,6 +52,7 @@ import threading
 from .writer import BlockWriter
 import time
 
+logger = logging.getLogger()
 
 class Compression(enum.Enum):
     """Compression type for Blosc"""
@@ -149,7 +151,6 @@ class Directory:
             metadata = {}
         self.metadata = metadata
         self.directory_offset = directory_offset
-        self.upqueue = multiprocessing.JoinableQueue()
         self.writers = None
         self.directory_writer = None
 
@@ -167,15 +168,23 @@ class Directory:
         """
         if self.writers is not None:
             return
-        self.writers = [BlockWriter(block_filename, self.upqueue,
-                                    self.compression.name,
-                                    self.compression_level,
-                                    queue_depth=queue_depth)
-                        for block_filename in self.block_filenames]
+        self.upqueue = multiprocessing.Queue()
+        down_queues = [multiprocessing.Queue() for _ in self.block_filenames]
+        self.writers = [
+            BlockWriter(block_filename, self.upqueue,
+                        down_queue,
+                        self.compression.name,
+                        self.compression_level,
+                        queue_depth=queue_depth)
+            for block_filename, down_queue
+            in zip(self.block_filenames,
+                   down_queues)]
         self.directory_writer = threading.Thread(
             target=Directory.directory_writer_process,
             args=(self,))
         self.directory_writer.start()
+        for writer in self.writers:
+            writer.start()
 
     def close(self):
         if self.writers is None:
@@ -183,12 +192,8 @@ class Directory:
         for writer in self.writers:
             writer.stop()
         for writer in self.writers:
-            while not writer.q_in.empty():
-                time.sleep(.25)
-        for writer in self.writers:
             writer.close()
         self.upqueue.put(None)
-        self.upqueue.join()
         self.directory_writer.join()
         self.writers = None
 
@@ -339,7 +344,6 @@ class Directory:
             while True:
                 msg = self.upqueue.get()
                 if msg is None:
-                    self.upqueue.task_done()
                     return
                 directory_offset, offset, size = msg
                 file_offset = self.directory_offset + \
@@ -348,7 +352,6 @@ class Directory:
                 self.encode_directory_entry(a, offset, size)
                 fd.seek(file_offset, os.SEEK_SET)
                 fd.write(a.data)
-                self.upqueue.task_done()
 
     def get_block_size(self, x, y, z):
         return (min(self.z_extent - z, self.z_block_size),
