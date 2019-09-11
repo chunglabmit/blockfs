@@ -346,12 +346,17 @@ class Directory:
                 if msg is None:
                     return
                 directory_offset, offset, size = msg
+                logger.debug(
+                    "Directory writer got msg: doffset= %d, offset=%d, size=%d"
+                    % (directory_offset, offset, size))
                 file_offset = self.directory_offset + \
                               directory_offset * self.directory_entry_size
                 a = np.zeros(self.directory_entry_size, np.uint8)
                 self.encode_directory_entry(a, offset, size)
                 fd.seek(file_offset, os.SEEK_SET)
                 fd.write(a.data)
+                logger.debug("Wrote entry of size %d to file offset %d" %
+                             (len(a.data), file_offset))
 
     def get_block_size(self, x, y, z):
         return (min(self.z_extent - z, self.z_block_size),

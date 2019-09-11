@@ -104,19 +104,28 @@ class BlockWriter:
         self.started = False
         self.stopped = False
         self.closed = False
+        self.pid = 0
 
     def start(self):
         self.process.start()
-        logger.info("Block writer started: pid=%d" % self.process.pid)
+        self.pid = self.process.pid
+        logger.info("Block writer started: pid=%d" % self.pid)
         self.started = True
 
     def stop(self):
         """Stop the writer process by sending it a message"""
         if self.stopped:
             return
-        logger.info("Stopping block writer: %d" % self.process.pid)
+        while not self.q_in.empty():
+            logger.info("Waiting for input queue to empty: %d" % self.pid)
+            time.sleep(.25)
+        while not self.q_out.empty():
+            logger.info("Waiting for output queue to empty: %d" % self.pid)
+            time.sleep(.25)
+        logger.info("Stopping block writer: %d" % self.pid)
         self.q_in.put(EOT)
         self.stopped = True
+        logger.info("Block writer stopped: %d" % self.pid)
 
     def close(self):
         """
@@ -126,9 +135,10 @@ class BlockWriter:
         if self.closed:
             return
         self.stop()
-        logger.info("Closing block writer: %d" % self.process.pid)
-        self.process.join()
-        logger.info("Block writer closed: %d" % self.process.pid)
+        logger.info("Closing block writer: %d" % self.pid)
+        if self.started:
+            self.process.join()
+        logger.info("Block writer closed: %d" % self.pid)
         self.closed = True
 
     def write(self, a:np.ndarray, directory_offset:int):

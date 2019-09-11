@@ -14,18 +14,22 @@ class TestWriter(unittest.TestCase):
 
     def test_02_writer_open_close(self):
         with tempfile.NamedTemporaryFile() as tf:
+            q_in = multiprocessing.Queue()
             q_out = multiprocessing.Queue()
-            writer = w.BlockWriter(tf.name, q_out, "zstd", 5)
+            writer = w.BlockWriter(tf.name, q_out, q_in, "zstd", 5)
+            writer.start()
             writer.close()
 
     def test_03_writer_send(self):
         with tempfile.NamedTemporaryFile() as tf:
+            q_in = multiprocessing.Queue()
             q_out = multiprocessing.Queue()
             a = np.random.randint(0, np.iinfo(np.uint16).max, (4, 5, 6))
-            writer = w.BlockWriter(tf.name, q_out, "zstd", 5)
+            writer = w.BlockWriter(tf.name, q_out, q_in, "zstd", 5)
+            writer.start()
             writer.write(a, 1234)
-            writer.close()
             directory_offset, position, size = q_out.get()
+            writer.close()
             self.assertEqual(directory_offset, 1234)
             self.assertEqual(position, 0)
             block = tf.file.read()
