@@ -169,7 +169,8 @@ class Directory:
         if self.writers is not None:
             return
         self.upqueue = multiprocessing.Queue()
-        down_queues = [multiprocessing.Queue() for _ in self.block_filenames]
+        down_queues = [multiprocessing.Queue(queue_depth)
+                       for _ in self.block_filenames]
         self.writers = [
             BlockWriter(block_filename, self.upqueue,
                         down_queue,
