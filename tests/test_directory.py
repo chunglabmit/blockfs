@@ -113,5 +113,17 @@ class TestDirectory(unittest.TestCase):
             a_out = directory.read_block(64, 128, 192)
             np.testing.assert_array_equal(a_out, 0)
 
+    def test_06_write_using_array_interface(self):
+        a = np.random.randint(0, 65535, (64, 64, 64), np.uint16)
+        with make_files(1) as (dir_file, block_files):
+            directory = Directory(1024, 1024, 1024, np.uint16, dir_file,
+                                  compression=Compression.zstd,
+                                  block_filenames=block_files)
+            directory.create()
+            directory[192:256, 128:192, 64:128] = a
+            directory.close()
+            a_out = Directory.open(dir_file).read_block(64, 128, 192)
+            np.testing.assert_array_equal(a, a_out)
+
 if __name__ == '__main__':
     unittest.main()

@@ -359,6 +359,10 @@ class Directory:
                 logger.debug("Wrote entry of size %d to file offset %d" %
                              (len(a.data), file_offset))
 
+    @property
+    def shape(self):
+        return self.z_extent, self.y_extent, self.x_extent
+
     def get_block_size(self, x, y, z):
         return (min(self.z_extent - z, self.z_block_size),
                 min(self.y_extent - y, self.y_block_size),
@@ -383,6 +387,20 @@ class Directory:
         idx = offset % len(self.writers)
         self.writers[idx].write(block.astype(self.dtype), offset)
 
+    def __setitem__(self, key, value):
+        assert len(key) == 3, "Must have three slice indices"
+        assert all([isinstance(_, slice) for _ in key]),\
+            "All indices must be slices"
+        assert all([(_.step == 1) or (_.step is None) for _ in key]), \
+            "All slices must have step == 1"
+        z0 = key[0].start
+        z1 = key[0].stop
+        y0 = key[1].start
+        y1 = key[1].stop
+        x0 = key[2].start
+        x1 = key[2].stop
+        self.write_block(value, x0, y0, z0)
+
     def read_block(self, x, y, z):
         offset = self.offsetof(x, y, z)
         shape = self.get_block_size(x, y, z)
@@ -405,3 +423,4 @@ class Directory:
             blosc = Blosc(self.compression, self.compression_level)
         data = blosc.decode(uncompressed)
         return np.frombuffer(data, self.dtype).reshape(shape)
+
