@@ -89,7 +89,7 @@ def main(args=sys.argv[1:]):
                         os.makedirs(dirname)
                     dirnames.add(dirname)
                 futures.append(pool.apply_async(
-                    write_plane, (shm, path, z, opts.compression)))
+                    write_plane, (shm, path, z - z0, opts.compression)))
             for future in tqdm.tqdm(
                 futures,
                 desc="Writing %d:%d" % (z0, z1),
