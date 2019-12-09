@@ -1,2 +1,5 @@
 numpy
 numcodecs
+git+git://github.com/chunglabmit/mp_shared_memory@master#egg=mp_shared_memory
+tifffile
+tqdm

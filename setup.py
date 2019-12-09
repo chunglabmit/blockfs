@@ -21,11 +21,15 @@ setup(
     entry_points=dict(
         console_scripts = [
             "blockfs-mv=blockfs.mv:main",
-            "blockfs-cp=blockfs.mv:copy_main"
+            "blockfs-cp=blockfs.mv:copy_main",
+            "blockfs2tif=blockfs.blockfs2tif:main"
         ]
     ),
     install_requires=[
+        "mp_shared_memory",
         "numpy",
-        "numcodecs"
+        "numcodecs",
+        "tifffile",
+        "tqdm"
     ]
 )
