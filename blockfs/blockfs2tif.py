@@ -1,5 +1,6 @@
 import argparse
 import itertools
+import numpy as np
 import os
 import tqdm
 
@@ -52,7 +53,10 @@ def read_block(shm, xoff, yoff, zoff, x0, x1, y0, y1, z0, z1):
 
 def write_plane(shm, path, z, compression):
     with shm.txn() as m:
-        tifffile.imsave(path, m[z], compress=compression)
+        # More than 31 bits? Time to use bigtiff
+        n_bits= m.dtype.itemsize * np.log(np.prod(m.shape)) / np.log(2)
+        bigtiff =  n_bits > 31
+        tifffile.imsave(path, m[z], compress=compression, bigtiff=bigtiff)
 
 
 def main(args=sys.argv[1:]):
