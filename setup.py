@@ -5,6 +5,21 @@ version="1.0.0"
 with open("README.md", "r") as fd:
     long_description = fd.read()
 
+console_scripts = [
+            "blockfs-mv=blockfs.mv:main",
+            "blockfs-cp=blockfs.mv:copy_main",
+            "blockfs2tif=blockfs.blockfs2tif:main"
+        ]
+#
+# Optionally, make blockfs2hdf5 available if we have mpi4py installed
+#
+try:
+    import mpi4py
+    console_scripts.append("blockfs2hdf5=blockfs.blockfs2hdf5:main")
+except:
+    pass
+
+
 setup(
     name="blockfs",
     version=version,
@@ -19,11 +34,7 @@ setup(
         'Programming Language :: Python :: 3.5'
     ],
     entry_points=dict(
-        console_scripts = [
-            "blockfs-mv=blockfs.mv:main",
-            "blockfs-cp=blockfs.mv:copy_main",
-            "blockfs2tif=blockfs.blockfs2tif:main"
-        ]
+        console_scripts = console_scripts
     ),
     install_requires=[
         "mp_shared_memory",

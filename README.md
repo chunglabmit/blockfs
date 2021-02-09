@@ -63,3 +63,64 @@ blockfs-cp <src> <dest>
 ```
 Copies a blockfs directory file. Same as blockfs-mv except does
 not (re)move the files.
+
+## blockfs2tif
+
+*blockfs2tif* converts a blockfs volume to TIFF stacks.
+
+Usage:
+
+```bash
+blockfs2tif \
+    --input <blockfs-file> \
+    --output-pattern <output-pattern> \
+    [--n-workers <n-workers>] \
+    [--silent] \
+    [--compression <compression>]
+```
+
+where
+* *blockfs-file* is the index file of the blockfs, e.g.
+  precomputed.blockfs
+  
+* *output-pattern* is the naming convention for .tiff files, e.g.
+  /path/to/img_%04d.tiff
+  
+* *n-workers* is the number of worker processes to use
+
+* *silent* will prevent display of tqdm progress bar
+
+* *compression* compression level = 0 to 9
+
+## blockfs2hdf
+
+**Note: only available if parallel HDF is built for current
+environment**
+
+*blockfs2hdf* converts a blockfs volume to HDF5.
+
+Usage:
+```bash
+mpiexec -n <n-workers> blockfs2hdf \
+    <src> \
+    <dest> \
+    <name> \
+    [--compression <compression>] \
+    [--compression-opts <compression-opts>]
+```
+
+where
+* *n-workers* is the number of worker processes to use
+  
+* *src* is the blockfs index file, e.g. precomputed.blockfs
+
+* *dest* is the name of the HDF5 file. It must already have been
+  created.
+  
+* *name* is the name of the dataset to be created.
+
+* *compression* is the name of the compression to use, e.g. "lzf".
+  By default, *blockfs2hdf* uses GZIP.
+  
+* *compression-opts* gives the compression options for the compression,
+  such as a number for gzip
