@@ -8,8 +8,9 @@ with open("README.md", "r") as fd:
 console_scripts = [
             "blockfs-mv=blockfs.mv:main",
             "blockfs-cp=blockfs.mv:copy_main",
-            "blockfs2tif=blockfs.blockfs2tif:main"
-        ]
+            "blockfs2tif=blockfs.blockfs2tif:main",
+            "blockfs2jp2k=blockfs.blockfs2jp2k:main"
+    ]
 #
 # Optionally, make blockfs2hdf5 available if we have mpi4py installed
 #
@@ -42,5 +43,8 @@ setup(
         "numcodecs",
         "tifffile",
         "tqdm"
-    ]
+    ],
+    extras_require={
+        "JPEG2000": [ "glymur" ]
+    }
 )

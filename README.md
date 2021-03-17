@@ -124,3 +124,39 @@ where
   
 * *compression-opts* gives the compression options for the compression,
   such as a number for gzip
+  
+## blockfs2jp2k
+
+*blockfs2jp2k* converts a blockfs volume to JPEG 2000 stacks.
+
+Note:
+*blockfs2jp2k* is only available if you have installed the optional
+dependency, "glymur".
+
+Usage:
+
+```bash
+blockfs2jp2k \
+    --input <blockfs-file> \
+    --output-pattern <output-pattern> \
+    [--n-workers <n-workers>] \
+    [--silent] \
+    [--psnr <psnr>]
+```
+
+where
+* *blockfs-file* is the index file of the blockfs, e.g.
+  precomputed.blockfs
+  
+* *output-pattern* is the naming convention for .jp2 files, e.g.
+  /path/to/img_%04d.jp2
+  
+* *n-workers* is the number of worker processes to use
+
+* *silent* will prevent display of tqdm progress bar
+
+* *psnr* this is the signal-to-noise ratio for data loss for lossy
+  compression, measured in DB. Higher numbers result in less loss
+  and 80dB, for instance, yields an image with little visible
+  difference from the original. The default is lossless compression.
+
