@@ -410,11 +410,11 @@ class Directory:
         if os.stat(self.directory_filename).st_size <\
             directory_offset + self.directory_entry_size:
             return np.zeros(shape, self.dtype)
-        m = np.memmap(self.directory_filename, mode="r",
-                      offset=directory_offset,
-                      shape=(self.directory_entry_size,))
+        with open(self.directory_filename, "rb") as fd:
+            fd.seek(directory_offset, os.SEEK_SET)
+            data = fd.read(self.directory_entry_size)
+        m = np.frombuffer(data, dtype=np.uint8)
         offset, size = self.decode_directory_entry(m)
-        del m
         if size == 0:
             return np.zeros(shape, self.dtype)
         with open(self.block_filenames[idx], "rb") as fd:
