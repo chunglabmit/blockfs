@@ -54,7 +54,7 @@ def read_block(shm, xoff, yoff, zoff, x0, x1, y0, y1, z0, z1):
 def write_plane(shm, path, z, compression):
     with shm.txn() as m:
         # More than 31 bits? Time to use bigtiff
-        n_bits= np.log(m.dtype.itemsize * np.prod(m.shape)) / np.log(2)
+        n_bits= np.log(m.dtype.itemsize * np.prod(m[z].shape)) / np.log(2)
         bigtiff =  n_bits > 31
         tifffile.imsave(path, m[z], compress=compression, bigtiff=bigtiff)
 
