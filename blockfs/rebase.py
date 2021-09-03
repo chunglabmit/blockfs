@@ -26,8 +26,9 @@ def parse_args(args=sys.argv[1:]):
 
 def main(args=sys.argv[1:]):
     opts = parse_args(args)
-    src_path = pathlib.Path(opts.index_file)
+    src_path = pathlib.Path(opts.index_file).absolute().resolve()
     src_directory = Directory.open(str(src_path))
+    directory_offset = src_directory.directory_offset
     dest_path = src_path.parent / (src_path.name + '.new')
     src_directory.block_filenames = [
         str(src_path.parent / pathlib.Path(_).name)
@@ -36,7 +37,7 @@ def main(args=sys.argv[1:]):
     src_directory.directory_filename = str(dest_path)
     src_directory.create(create_shards=False)
     with src_path.open("rb") as src_fd:
-        src_fd.seek(src_directory.directory_offset)
+        src_fd.seek(directory_offset)
         with dest_path.open("ab+") as dest_fd:
             for offset in range(src_directory.directory_offset,
                                 src_path.stat().st_size,

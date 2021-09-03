@@ -13,7 +13,9 @@ from blockfs.rebase import main
 class TestRebase(unittest.TestCase):
     def test_case(self):
         src_dir = pathlib.Path(tempfile.mkdtemp())
-        dest_dir = pathlib.Path(tempfile.mkdtemp())
+        dest_dir_parent = pathlib.Path(tempfile.mkdtemp())
+        dest_dir = dest_dir_parent / "dest"
+        dest_dir.mkdir()
         all_files = []
         rs = np.random.RandomState(1234)
         a = rs.randint(0, 65535, (256, 256, 256), dtype=np.uint16)
@@ -48,6 +50,7 @@ class TestRebase(unittest.TestCase):
                 for path in all_files:
                     path.unlink()
                 dest_dir.rmdir()
+                dest_dir_parent.rmdir()
             except:
                 traceback.print_exc()
                 print("Failed to remove files")
