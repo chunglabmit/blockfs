@@ -283,7 +283,7 @@ class Directory:
                 elif key == "ZStride":
                     z_stride = int(value)
                 elif key == "Compression":
-                    compression = value
+                    compression = Compression[value]
                 elif key == "CompressionLvl":
                     compression_level = int(value)
                 elif key == "Version":
@@ -306,7 +306,7 @@ class Directory:
                              compression_level=compression_level,
                              metadata = application_metadata)
 
-    def create(self):
+    def create(self, create_shards=True):
         """
         Create a BlockFS filesystem from the initialization params.
 
@@ -336,9 +336,10 @@ class Directory:
                               np.uint32).data)
             fd.write(json_md)
         # Touch each file
-        for filename in self.block_filenames:
-            with open(filename, "wb") as fd:
-                pass
+        if create_shards:
+            for filename in self.block_filenames:
+                with open(filename, "wb") as fd:
+                    pass
 
     def directory_writer_process(self):
         with open(self.directory_filename, "r+b") as fd:

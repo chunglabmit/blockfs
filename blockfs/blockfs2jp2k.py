@@ -39,6 +39,12 @@ def parse_args(args=sys.argv[1:]):
         default=0,
         type=float
     )
+    parser.add_argument(
+        "--memory",
+        help="Maximum amount of memory to use in GB",
+        default=512,
+        type=int
+    )
     return parser.parse_args(args)
 
 
@@ -60,14 +66,17 @@ def main(args=sys.argv[1:]):
     global DIRECTORY
     opts = parse_args(args)
     DIRECTORY = Directory.open(opts.input)
+    mem_z_block_size = opts.memory * 1000 * 1000 * 1000 // \
+        DIRECTORY.y_extent // DIRECTORY.x_extent // 2
+    z_block_size = min(DIRECTORY.z_block_size, mem_z_block_size)
     shm = SharedMemory(
-        (DIRECTORY.z_block_size, DIRECTORY.y_extent, DIRECTORY.x_extent),
+        (z_block_size, DIRECTORY.y_extent, DIRECTORY.x_extent),
         DIRECTORY.dtype
     )
     dirnames = set()
     with multiprocessing.Pool(opts.n_workers) as pool:
-        for z0 in range(0, DIRECTORY.z_extent, DIRECTORY.z_block_size):
-            z1 = min(z0 + DIRECTORY.z_block_size, DIRECTORY.z_extent)
+        for z0 in range(0, DIRECTORY.z_extent, z_block_size):
+            z1 = min(z0 + z_block_size, DIRECTORY.z_extent)
             yr = range(0, DIRECTORY.y_extent, DIRECTORY.y_block_size)
             xr = range(0, DIRECTORY.x_extent, DIRECTORY.x_block_size)
             futures = []

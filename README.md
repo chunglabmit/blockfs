@@ -160,3 +160,18 @@ where
   and 80dB, for instance, yields an image with little visible
   difference from the original. The default is lossless compression.
 
+## blockfs-rebase
+
+**blockfs-rebase** fixes up the blockfs directory file after it and the block files
+have been moved to a new directory.
+
+Usage:
+
+blockfs-rebase [--block-size <block-size>] <blockfs-file>
+
+where:
+
+* **blockfs-file** is the path to the precomputed.blockfs file
+
+* **block-size** is the number of bytes in each read of the blockfs index file.
+

@@ -9,7 +9,8 @@ console_scripts = [
             "blockfs-mv=blockfs.mv:main",
             "blockfs-cp=blockfs.mv:copy_main",
             "blockfs2tif=blockfs.blockfs2tif:main",
-            "blockfs2jp2k=blockfs.blockfs2jp2k:main"
+            "blockfs2jp2k=blockfs.blockfs2jp2k:main",
+            "blockfs-rebase=blockfs.rebase:main"
     ]
 #
 # Optionally, make blockfs2hdf5 available if we have mpi4py installed
