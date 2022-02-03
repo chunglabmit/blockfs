@@ -46,6 +46,8 @@ import json
 import logging
 import numpy as np
 import os
+
+import typing
 from numcodecs import Blosc
 import multiprocessing
 import threading
@@ -153,6 +155,12 @@ class Directory:
         self.directory_offset = directory_offset
         self.writers = None
         self.directory_writer = None
+        self.file_sizes = {}
+        self.file_handles:typing.Dict[str, io.BufferedReader] = {}
+
+    def __del__(self):
+        for fh in self.file_handles.values():
+            fh.close()
 
     def start_writer_processes(self, queue_depth=10):
         """
@@ -402,26 +410,36 @@ class Directory:
         x1 = key[2].stop
         self.write_block(value, x0, y0, z0)
 
+    def filesize(self, filename):
+        if filename not in self.file_sizes:
+            self.file_sizes[filename] = os.stat(filename).st_size
+        return self.file_sizes[filename]
+
+    def file_handle(self, filename):
+        if filename not in self.file_handles:
+            self.file_handles[filename] = open(filename, "rb")
+        return self.file_handles[filename]
+
     def read_block(self, x, y, z):
         offset = self.offsetof(x, y, z)
         shape = self.get_block_size(x, y, z)
         idx = offset % len(self.block_filenames)
         directory_offset = self.directory_offset + \
                            offset * self.directory_entry_size
-        if os.stat(self.directory_filename).st_size <\
+        if  self.filesize(self.directory_filename) <\
             directory_offset + self.directory_entry_size:
             return np.zeros(shape, self.dtype)
-        with open(self.directory_filename, "rb") as fd:
-            fd.seek(directory_offset, os.SEEK_SET)
-            data = fd.read(self.directory_entry_size)
+        fd = self.file_handle(self.directory_filename)
+        fd.seek(directory_offset, os.SEEK_SET)
+        data = fd.read(self.directory_entry_size)
         m = np.frombuffer(data, dtype=np.uint8)
         offset, size = self.decode_directory_entry(m)
         if size == 0:
             return np.zeros(shape, self.dtype)
-        with open(self.block_filenames[idx], "rb") as fd:
-            fd.seek(offset)
-            uncompressed = fd.read(size)
-            blosc = Blosc(self.compression, self.compression_level)
+        fd = self.file_handle(self.block_filenames[idx])
+        fd.seek(offset)
+        uncompressed = fd.read(size)
+        blosc = Blosc(self.compression, self.compression_level)
         data = blosc.decode(uncompressed)
         return np.frombuffer(data, self.dtype).reshape(shape)
 

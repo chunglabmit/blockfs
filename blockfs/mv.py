@@ -43,7 +43,7 @@ def main(args=sys.argv[1:], move=True):
         y_block_size=directory.y_block_size,
         z_block_size=directory.z_block_size,
         block_filenames=dest_block_filenames,
-        compression=getattr(Compression, directory.compression),
+        compression=directory.compression,
         compression_level=directory.compression_level,
         metadata=directory.metadata)
     dest_directory.create()
