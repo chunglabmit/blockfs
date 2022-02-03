@@ -74,8 +74,8 @@ def main(args=sys.argv[1:]):
         DIRECTORY.dtype
     )
     dirnames = set()
-    with multiprocessing.Pool(opts.n_workers) as pool:
-        for z0 in range(0, DIRECTORY.z_extent, z_block_size):
+    for z0 in range(0, DIRECTORY.z_extent, z_block_size):
+        with multiprocessing.Pool(opts.n_workers) as pool:
             z1 = min(z0 + z_block_size, DIRECTORY.z_extent)
             yr = range(0, DIRECTORY.y_extent, DIRECTORY.y_block_size)
             xr = range(0, DIRECTORY.x_extent, DIRECTORY.x_block_size)
