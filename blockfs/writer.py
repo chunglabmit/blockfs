@@ -51,6 +51,7 @@ def block_writer_process(
     logger.info("%d: Starting block writer process for %s" % (pid, path))
     with open(path, "r+b") as fd:
         fd.seek(0, os.SEEK_END)
+        position = fd.tell()
         blosc = Blosc(cname=compression, clevel=compression_level)
         while True:
             try:
@@ -62,7 +63,6 @@ def block_writer_process(
             if msg == EOT:
                 logger.info("%d: Got end-of-process message" % pid)
                 break
-            position = fd.tell()
             logger.debug("%d: Position = %d" % (pid, position))
             a = msg.get()
             block = blosc.encode(a)
@@ -70,6 +70,7 @@ def block_writer_process(
             logger.debug("%d: Writing block of length %d" % (pid, count))
             fd.write(block)
             q_out.put((msg.directory_offset, position, count))
+            position += len(block)
             logger.debug("%d: Task done: %d" % (pid, position))
     logger.info("Making sure q_out is empty: %d" % pid)
     while not q_out.empty():
